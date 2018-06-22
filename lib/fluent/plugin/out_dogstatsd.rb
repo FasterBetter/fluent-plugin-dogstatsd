@@ -1,5 +1,7 @@
+require 'fluent/plugin/output'
+
 module Fluent
-  class DogstatsdOutput < BufferedOutput
+  class DogstatsdOutput < Output
     Plugin.register_output('dogstatsd', self)
 
     config_param :host, :string, :default => nil
@@ -39,10 +41,11 @@ module Fluent
     end
 
     def write(chunk)
+      tag = chunk.metadata.tag
       @statsd.batch do |s|
-        chunk.msgpack_each do |tag, time, record|
-          key = @key
-
+        chunk.msgpack_each do |time, record|
+          key = extract_placeholders(@key, chunk.metadata)
+          log.warn "key extract #{key}"
           if !key
             key = if @use_tag_as_key
                 tag
