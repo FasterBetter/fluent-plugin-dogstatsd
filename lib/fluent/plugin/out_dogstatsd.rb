@@ -4,6 +4,7 @@ module Fluent
 
     config_param :host, :string, :default => nil
     config_param :port, :integer, :default => nil
+    config_param :key, :string, :default => nil
     config_param :use_tag_as_key, :bool, :default => false
     config_param :use_tag_as_key_if_missing, :bool, :default => false
     config_param :flat_tags, :bool, :default => false
@@ -40,11 +41,15 @@ module Fluent
     def write(chunk)
       @statsd.batch do |s|
         chunk.msgpack_each do |tag, time, record|
-          key = if @use_tag_as_key
-                  tag
-                else
-                  record.delete('key')
-                end
+          key = @key
+
+          if !key
+            key = if @use_tag_as_key
+                tag
+              else
+                record.delete('key')
+              end
+          end
 
           if !key && @use_tag_as_key_if_missing
             key = tag
