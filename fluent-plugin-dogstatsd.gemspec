@@ -1,11 +1,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'fluent/plugin/dogstatsd/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-dogstatsd"
-  spec.version       = Fluent::Plugin::Dogstatsd::VERSION
+  spec.version       = "0.0.7"
   spec.authors       = ["Ryota Arai"]
   spec.email         = ["ryota.arai@gmail.com"]
   spec.summary       = %q{Fluent plugin for Dogstatsd, that is statsd server for Datadog.}
