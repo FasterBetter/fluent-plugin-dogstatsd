@@ -17,7 +17,7 @@ module Fluent::Plugin
 
     config_section :buffer do
         config_set_default :flush_mode, :immediate
-        config_set_default :chunk_keys, ["tag", "backend_name"]
+        config_set_default :chunk_keys, ["tag"]
     end
 
     unless method_defined?(:log)
@@ -25,6 +25,11 @@ module Fluent::Plugin
     end
 
     attr_accessor :statsd
+
+    def configure(conf)
+      super
+
+    end
 
     def initialize
       super
@@ -42,7 +47,10 @@ module Fluent::Plugin
 
     def write(chunk)
       tag = chunk.metadata.tag
-      key = extract_placeholders(@key, chunk)
+      key = @key
+      if key != nil
+        key = extract_placeholders(key, chunk)
+      end
 
       @statsd.batch do |s|
         chunk.each do |time, record|
