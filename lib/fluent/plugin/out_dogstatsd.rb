@@ -4,6 +4,8 @@ module Fluent::Plugin
   class DogstatsdOutput < Output
     Fluent::Plugin.register_output('dogstatsd', self)
 
+    helpers :compat_parameters
+
     config_param :host, :string, :default => nil
     config_param :port, :integer, :default => nil
     config_param :key, :string, :default => nil
@@ -16,6 +18,7 @@ module Fluent::Plugin
     config_param :sample_rate, :float, :default => nil
 
     config_section :buffer do
+        config_set_default :@type, "memory"
         config_set_default :flush_mode, :immediate
         config_set_default :chunk_keys, ["tag"]
     end
@@ -28,6 +31,8 @@ module Fluent::Plugin
 
     def configure(conf)
       super
+      compat_parameters_convert(conf, :buffer)
+      raise Fluent::ConfigError, "'tag' in chunk_keys is required." if not @chunk_key_tag
 
     end
 
