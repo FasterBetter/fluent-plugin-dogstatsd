@@ -31,6 +31,12 @@ Supported types are `increment`, `decrement`, `count`, `gauge`, `histogram`, `ti
   # Use tag of fluentd record as key sent to Dogstatsd
   use_tag_as_key false
 
+  # Optionally use a fixed key name for the metric name
+  key haproxy.services.api.num_requests
+
+  # Optionally use dynamic key that's implemented via `Fluent::Plugin::Output#extract_placeholders`
+  # key haproxy.services.${service}.num_requests
+
   # (Treat fields in a record as tags)
   # flat_tags true
 
@@ -77,6 +83,44 @@ Supported types are `increment`, `decrement`, `count`, `gauge`, `histogram`, `ti
   metric_type histogram
   flat_tags true
   use_tag_as_key true
+</match>
+```
+
+```haproxy
+<source>
+  type tail
+  path /var/log/haproxy.requests.log
+  pos_file /var/log/haproxy-requests.log.pos
+  tag haproxy.requests
+  format json
+</source>
+
+<match haproxy.requests>
+  type dogstatsd
+  metric_type histogram
+  key haproxy.services.${service}.response_time
+  value_key response_time
+  <buffer ["tag", "service"]>
+  </buffer>
+</match>
+```
+
+```haproxy
+<source>
+  type tail
+  path /var/log/haproxy.requests.log
+  pos_file /var/log/haproxy-requests.log.pos
+  tag haproxy.requests
+  format json
+</source>
+
+<match haproxy.requests>
+  type dogstatsd
+  metric_type histogram
+  key haproxy.overall.response_time
+  value_key response_time
+  <buffer ["tag"]>
+  </buffer>
 </match>
 ```
 
