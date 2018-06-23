@@ -1,8 +1,8 @@
 require 'fluent/plugin/output'
 
-module Fluent
+module Fluent::Plugin
   class DogstatsdOutput < Output
-    Plugin.register_output('dogstatsd', self)
+    Fluent::Plugin.register_output('dogstatsd', self)
 
     config_param :host, :string, :default => nil
     config_param :port, :integer, :default => nil
@@ -15,6 +15,11 @@ module Fluent
     config_param :value_key, :string, :default => nil
     config_param :sample_rate, :float, :default => nil
 
+    config_section :buffer do
+        config_set_default :flush_mode, :immediate
+        config_set_default :chunk_keys, ["tag", "backend_name"]
+    end
+
     unless method_defined?(:log)
       define_method(:log) { $log }
     end
@@ -24,28 +29,23 @@ module Fluent
     def initialize
       super
 
-      require 'statsd' # dogstatsd-ruby
+      require 'datadog/statsd' # dogstatsd-ruby
     end
 
     def start
       super
 
-      host = @host || Statsd::DEFAULT_HOST
-      port = @port || Statsd::DEFAULT_PORT
-
-      @statsd ||= Statsd.new(host, port)
-    end
-
-    def format(tag, time, record)
-      [tag, time, record].to_msgpack
+      host = @host || Datadog::Statsd::DEFAULT_HOST
+      port = @port || Datadog::Statsd::DEFAULT_PORT
+      @statsd ||= Datadog::Statsd.new(host, port)
     end
 
     def write(chunk)
       tag = chunk.metadata.tag
+      key = extract_placeholders(@key, chunk)
+
       @statsd.batch do |s|
-        chunk.msgpack_each do |time, record|
-          key = extract_placeholders(@key, chunk.metadata)
-          log.warn "key extract #{key}"
+        chunk.each do |time, record|
           if !key
             key = if @use_tag_as_key
                 tag
