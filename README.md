@@ -1,10 +1,19 @@
 # fluent-plugin-dogstatsd
 
-Fluend plugin for Dogstatsd, that is statsd server for Datadog.
+(Forked) Fluend plugin for Dogstatsd, that is statsd server for Datadog.
 
-## Installation
+## Installation (from original source)
 
     $ gem install fluent-plugin-dogstatsd
+
+
+## Installation (from this fork)
+
+```bash
+    gem install specific_install
+    gem specific_install https://github.com/dsouzajude/fluent-plugin-dogstatsd.git
+```
+
 
 ## Usage
 
