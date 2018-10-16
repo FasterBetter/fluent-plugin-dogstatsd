@@ -54,6 +54,9 @@ Supported types are `increment`, `decrement`, `count`, `gauge`, `histogram`, `ti
 
   # Default: "value"
   # value_key Value
+
+  # Discard nil values which will not send these metrics to dogstatsd
+  discard_nil true
 </match>
 ```
 

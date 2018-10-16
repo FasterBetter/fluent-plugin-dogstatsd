@@ -16,6 +16,7 @@ module Fluent::Plugin
     config_param :metric_type, :string, :default => nil
     config_param :value_key, :string, :default => nil
     config_param :sample_rate, :float, :default => nil
+    config_param :discard_nil, :bool, :default => false
 
     config_section :buffer do
         config_set_default :@type, "memory"
@@ -76,6 +77,7 @@ module Fluent::Plugin
             next
           end
 
+          value_key = @value_key
           value = record.delete(@value_key || 'value')
 
           options = {}
@@ -83,6 +85,11 @@ module Fluent::Plugin
           text  = record.delete('text')
           type  = @metric_type || record.delete('type')
           sample_rate = @sample_rate || record.delete('sample_rate')
+          discard_nil = @discard_nil
+
+          if discard_nil == true and value.nil?
+            return
+          end
 
           if sample_rate
             options[:sample_rate] = sample_rate
