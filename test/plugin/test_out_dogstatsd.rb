@@ -66,6 +66,24 @@ class DogstatsdOutputTest < Test::Unit::TestCase
     ])
   end
 
+  def test_multi_key_value
+    d = create_driver(<<-EOC)
+#{default_config}
+multi_key_value http.count2xx:count2xx,http.count5xx:count5xx
+    EOC
+
+    d.run(default_tag: 'test') do
+        d.feed({'type' => 'count', 'count2xx' => 3, 'count5xx' => 9})
+    end
+
+    assert_equal(d.instance.statsd.messages, [
+      [:count, 'http.count2xx', 3, {}],
+      [:count, 'http.count5xx', 9, {}]
+    ])
+
+  end
+
+
   def test_flat_tag
     d = create_driver(<<-EOC)
 #{default_config}

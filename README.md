@@ -57,6 +57,10 @@ Supported types are `increment`, `decrement`, `count`, `gauge`, `histogram`, `ti
 
   # Discard nil values which will not send these metrics to dogstatsd
   discard_nil true
+
+  # Optional (if key and value fields are not set)
+  # Used for pushing the same metric type for multiple key and value_key pairs
+  multi_key_value key1:value_key1,key2:value_key2
 </match>
 ```
 
